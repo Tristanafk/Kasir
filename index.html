@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Kasir Kantin Sekolah</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <section id="page-login" class="page login-page active">
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-logo">KS</div>
+        <div>
+          <h1>Kantin Sekolah</h1>
+          <p>Sistem Kasir Digital</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input id="loginEmail" class="input" type="email" placeholder="kasir@sekolah.sch.id">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input id="loginPass" class="input" type="password" placeholder="Masukkan password">
+      </div>
+
+      <button class="btn btn-primary" onclick="doLogin()">Masuk</button>
+
+      <p class="hint">Gunakan akun yang sudah dibuat di Firebase Authentication.</p>
+    </div>
+  </section>
+
+  <section id="page-dashboard" class="page">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo small">KS</div>
+        <div>
+          <h2>Kantin Sekolah</h2>
+          <p>Point of Sale</p>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-item active" onclick="switchTab('transaksi', this)">Transaksi</button>
+        <button class="menu-item" onclick="switchTab('produk', this)">Produk</button>
+        <button class="menu-item" onclick="switchTab('riwayat', this)">Riwayat</button>
+        <button class="menu-item admin-only" onclick="switchTab('admin', this)">Admin Produk</button>
+      </nav>
+
+      <button class="logout" onclick="doLogout()">Keluar</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Sistem Kasir Kantin</h1>
+          <p id="clockDate">Memuat tanggal...</p>
+        </div>
+        <div>
+          <div class="clock" id="clockTime">--:--:--</div>
+          <div class="role-info" id="roleInfo">Role: -</div>
+        </div>
+      </header>
+
+      <section id="tab-transaksi" class="tab active">
+        <div class="section-header">
+          <div>
+            <h2>Transaksi Baru</h2>
+            <p>Pilih produk, scan barcode, lalu proses pembayaran.</p>
+          </div>
+          <button class="btn btn-danger" onclick="clearCart()">Kosongkan</button>
+        </div>
+
+        <div class="pos-layout">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Daftar Produk</h3>
+              <input class="input search" placeholder="Cari produk..." oninput="filterProducts(this.value)">
+            </div>
+
+            <div class="barcode-scan-box">
+              <input id="barcodeInput" class="input" placeholder="Scan / ketik barcode produk, contoh PRD001">
+              <button class="btn btn-primary" onclick="addByBarcode()">Tambah</button>
+            </div>
+
+            <div id="productGrid" class="product-grid"></div>
+          </div>
+
+          <div class="panel cart-panel">
+            <h3>Keranjang</h3>
+
+            <div id="cartList" class="cart-list">
+              <p class="empty">Keranjang masih kosong.</p>
+            </div>
+
+            <div class="summary">
+              <div><span>Subtotal</span><b id="subtotalEl">Rp 0</b></div>
+              <div><span>Diskon</span><b id="discountEl">Rp 0</b></div>
+              <div><span>PPN 11%</span><b id="ppnEl">Rp 0</b></div>
+              <div class="total"><span>Total</span><b id="grandTotalEl">Rp 0</b></div>
+            </div>
+
+            <div class="payment">
+              <label>Uang Bayar</label>
+              <input id="cashInput" class="input" type="number" placeholder="Contoh: 50000" oninput="calcChange()">
+              <div class="change">Kembalian: <b id="changeEl">Rp 0</b></div>
+
+              <button class="btn btn-primary" onclick="processPayment('cash')">Bayar Tunai</button>
+              <button class="btn btn-secondary" onclick="processPayment('qris')">Bayar QRIS</button>
+              <button class="btn btn-secondary" onclick="processPayment('transfer')">Transfer Bank</button>
+              <button class="btn btn-secondary" onclick="processPayment('ewallet')">E-Wallet</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-produk" class="tab">
+        <div class="section-header">
+          <div>
+            <h2>Data Produk</h2>
+            <p>Data produk diambil dari Firebase Firestore.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div id="productTable" class="table-wrap"></div>
+        </div>
+      </section>
+
+      <section id="tab-riwayat" class="tab">
+        <div class="section-header">
+          <div>
+            <h2>Riwayat Transaksi</h2>
+            <p>Daftar transaksi yang tersimpan di Firebase.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div id="historyTable" class="table-wrap"></div>
+        </div>
+      </section>
+
+      <section id="tab-admin" class="tab">
+        <div class="section-header">
+          <div>
+            <h2>Manajemen Produk</h2>
+            <p>Admin dapat tambah, edit, hapus produk, ubah harga, stok, dan barcode.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="admin-form">
+            <input type="hidden" id="productDocId">
+
+            <input id="productBarcode" class="input" placeholder="Barcode / SKU, contoh PRD001">
+            <input id="productName" class="input" placeholder="Nama produk">
+            <input id="productCategory" class="input" placeholder="Kategori">
+            <input id="productPrice" class="input" type="number" placeholder="Harga">
+            <input id="productStock" class="input" type="number" placeholder="Stok">
+
+            <button class="btn btn-primary" onclick="saveProduct()">Simpan Produk</button>
+            <button class="btn btn-secondary" onclick="resetProductForm()">Reset Form</button>
+          </div>
+
+          <div id="adminProductTable" class="table-wrap admin-table"></div>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <div id="receiptModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Struk Transaksi</h3>
+        <button onclick="closeReceipt()">×</button>
+      </div>
+
+      <div id="receiptArea" class="receipt-area"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeReceipt()">Tutup</button>
+        <button class="btn btn-primary" onclick="printReceipt()">Cetak Struk</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>
