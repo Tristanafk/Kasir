@@ -926,24 +926,31 @@ function initDefaultReportDate() {
   if (!input) return;
 
   input.value = toDateInputValue(new Date());
+
+  const monthInput = document.getElementById("laporanMonth");
+  if (monthInput) monthInput.value = toDateInputValue(new Date()).slice(0, 7);
 }
 
 window.loadLaporan = async function () {
-  if (currentRole !== "admin") {
-    showToast("Laporan hanya untuk admin.", "error");
-    return;
-  }
+  const type = document.getElementById("laporanType")?.value || "harian";
+  const selectedDate = document.getElementById("laporanDate")?.value;
+  const selectedMonth = document.getElementById("laporanMonth")?.value;
 
-  const dateInput = document.getElementById("laporanDate");
-  const selectedDate = dateInput?.value;
-
-  if (!selectedDate) {
+  if (type === "harian" && !selectedDate) {
     showToast("Pilih tanggal laporan.", "error");
     return;
   }
 
+  if (type === "bulanan" && !selectedMonth) {
+    showToast("Pilih bulan laporan.", "error");
+    return;
+  }
+
   try {
-    const { start, end } = getDateRange(selectedDate);
+    const { start, end } = type === "harian"
+      ? getDateRange(selectedDate)
+      : getMonthRange(selectedMonth);
+
     const q = query(
       collection(db, "transactions"),
       where("createdAt", ">=", Timestamp.fromDate(start)),
@@ -954,14 +961,14 @@ window.loadLaporan = async function () {
     const snapshot = await getDocs(q);
     const transactions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    renderLaporan(selectedDate, transactions);
+    renderLaporan(type === "harian" ? selectedDate : selectedMonth, transactions, type);
   } catch (err) {
     console.error(err);
     showToast("Gagal memuat laporan.", "error");
   }
 };
 
-function renderLaporan(dateString, transactions) {
+function renderLaporan(dateString, transactions, type = "harian") {
   const totalOmzet = transactions.reduce((sum, t) => sum + Number(t.total || 0), 0);
   const totalDiscount = transactions.reduce((sum, t) => sum + Number(t.discount || 0), 0);
   const count = transactions.length;
@@ -971,7 +978,7 @@ function renderLaporan(dateString, transactions) {
   setText("statCount", count);
   setText("statAvg", formatRp(avg));
   setText("statDiscount", formatRp(totalDiscount));
-  setText("statDate", formatDisplayDate(dateString));
+  setText("statDate", type === "harian" ? formatDisplayDate(dateString) : formatDisplayMonth(dateString));
 
   renderMethodBreakdown(transactions);
   renderLaporanTable(transactions);
@@ -1038,6 +1045,99 @@ function renderLaporanTable(transactions) {
       </tbody>
     </table>
   `;
+}
+
+window.downloadLaporanPDF = async function () {
+  const dateInput = document.getElementById("laporanDate");
+  const selectedDate = dateInput?.value;
+
+  if (!selectedDate) {
+    showToast("Pilih tanggal laporan dulu.", "error");
+    return;
+  }
+
+  try {
+    const { start, end } = getDateRange(selectedDate);
+
+    const q = query(
+      collection(db, "transactions"),
+      where("createdAt", ">=", Timestamp.fromDate(start)),
+      where("createdAt", "<", Timestamp.fromDate(end)),
+      orderBy("createdAt", "desc")
+    );
+
+    const snapshot = await getDocs(q);
+    const transactions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (!transactions.length) {
+      showToast("Tidak ada transaksi pada tanggal ini.", "info");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const docPdf = new jsPDF();
+
+    const totalOmzet = transactions.reduce((sum, t) => sum + Number(t.total || 0), 0);
+    const totalDiscount = transactions.reduce((sum, t) => sum + Number(t.discount || 0), 0);
+    const totalPpn = transactions.reduce((sum, t) => sum + Number(t.ppn || 0), 0);
+
+    docPdf.setFontSize(16);
+    docPdf.text("Laporan Penjualan Harian", 14, 15);
+
+    docPdf.setFontSize(10);
+    docPdf.text(`Tanggal: ${formatDisplayDate(selectedDate)}`, 14, 23);
+    docPdf.text(`Dicetak oleh: ${currentDisplayName || "-"}`, 14, 29);
+
+    docPdf.text(`Total Omzet: ${formatRp(totalOmzet)}`, 14, 39);
+    docPdf.text(`Jumlah Transaksi: ${transactions.length}`, 14, 45);
+    docPdf.text(`Total Diskon: ${formatRp(totalDiscount)}`, 14, 51);
+    docPdf.text(`Total PPN: ${formatRp(totalPpn)}`, 14, 57);
+
+    const rows = transactions.map(t => {
+      const date = t.createdAt?.toDate
+        ? t.createdAt.toDate().toLocaleString("id-ID")
+        : "-";
+
+      return [
+        t.id.slice(0, 8),
+        date,
+        METHOD_LABELS[t.method] || t.method || "-",
+        formatRp(t.subtotal),
+        formatRp(t.discount),
+        formatRp(t.ppn),
+        formatRp(t.total),
+        t.cashierName || t.cashierEmail || "-"
+      ];
+    });
+
+    docPdf.autoTable({
+      startY: 65,
+      head: [["ID", "Tanggal", "Metode", "Subtotal", "Diskon", "PPN", "Total", "Kasir"]],
+      body: rows,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [37, 99, 235] }
+    });
+
+    docPdf.save(`laporan-penjualan-${selectedDate}.pdf`);
+    showToast("PDF laporan berhasil dibuat.", "success");
+
+  } catch (err) {
+    console.error(err);
+    showToast("Gagal membuat PDF laporan.", "error");
+  }
+};
+
+window.toggleLaporanInput = function () {
+  const type = document.getElementById("laporanType")?.value || "harian";
+  document.getElementById("laporanDate").style.display = type === "harian" ? "block" : "none";
+  document.getElementById("laporanMonth").style.display = type === "bulanan" ? "block" : "none";
+};
+
+function getMonthRange(monthString) {
+  const start = new Date(`${monthString}-01T00:00:00`);
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + 1);
+  return { start, end };
 }
 
 /* =========================
@@ -1166,7 +1266,7 @@ async function moveSnapshotsToArchive(snapshot) {
    TAB
 ========================= */
 window.switchTab = function (tabName, btn) {
-  if ((tabName === "admin" || tabName === "laporan") && currentRole !== "admin") {
+  if (tabName === "admin" && currentRole !== "admin") {
     showToast("Menu ini hanya untuk role admin.", "error");
     return;
   }
@@ -1263,6 +1363,14 @@ function formatDisplayDate(dateString) {
   return date.toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+function formatDisplayMonth(monthString) {
+  const date = new Date(`${monthString}-01T00:00:00`);
+  return date.toLocaleDateString("id-ID", {
     month: "long",
     year: "numeric"
   });

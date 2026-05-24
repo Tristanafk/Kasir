@@ -87,6 +87,10 @@ onAuthStateChanged(auth, async user => {
         el.style.display = role === "admin" ? "block" : "none";
       });
 
+      document.querySelectorAll(".laporan-access").forEach(el => {
+        el.style.display = "block";
+      });
+
       // Apply dark mode icon
       const toggle = document.getElementById("darkModeToggle");
       if (toggle) {

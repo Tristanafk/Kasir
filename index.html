@@ -33,7 +33,7 @@
         </button>
         <button class="menu-item" onclick="switchTab('produk', this)"><i class="fa-solid fa-box"></i> Produk</button>
         <button class="menu-item" onclick="switchTab('riwayat', this)"><i class="fa-solid fa-receipt"></i> Riwayat</button>
-        <button class="menu-item admin-only" onclick="switchTab('laporan', this)"><i class="fa-solid fa-chart-line"></i><span>Laporan</span></button>
+        <button class="menu-item laporan-access" onclick="switchTab('laporan', this)"><i class="fa-solid fa-chart-line"></i><span>Laporan</span></button>
         <button class="menu-item admin-only" onclick="switchTab('admin', this)"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
       </nav>
 
@@ -164,8 +164,18 @@
             <p>Rekap penjualan harian khusus admin.</p>
           </div>
           <div class="laporan-controls">
+            <select id="laporanType" class="input" style="width:150px" onchange="toggleLaporanInput()">
+              <option value="harian">Harian</option>
+              <option value="bulanan">Bulanan</option>
+            </select>
+
             <input type="date" id="laporanDate" class="input" style="width:170px">
+            <input type="month" id="laporanMonth" class="input" style="width:170px; display:none">
+
             <button class="btn btn-primary" style="width:auto" onclick="loadLaporan()">Tampilkan</button>
+            <button class="btn btn-secondary" style="width:auto" onclick="downloadLaporanPDF()">
+              <i class="fa-solid fa-file-pdf"></i> Download PDF
+            </button>
           </div>
         </div>
 
@@ -292,6 +302,8 @@
 
   <div id="toast" class="toast"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>  
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script type="module" src="script.js"></script>
   <script type="module" src="auth.js"></script>
