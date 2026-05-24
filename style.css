@@ -554,26 +554,189 @@ svg[id^="barcode-"] { margin-top: 7px; max-width: 140px; background: white; padd
 }
 
 /* === Responsive === */
+/* === Responsive Fix Mobile === */
 @media (max-width: 1000px) {
-  .page.active { display: block; }
-  .sidebar { width: 100%; min-height: auto; flex-direction: row; flex-wrap: wrap; gap: 10px; }
-  .menu { flex-direction: row; margin-top: 0; }
-  .logout { margin-top: 0; }
-  .main { padding: 16px; }
-  .pos-layout { grid-template-columns: 1fr; }
-  .cart-panel { position: static; max-height: none; }
+  .page.active {
+    display: block;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    padding: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .sidebar-brand {
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    margin-top: 0;
+    padding-bottom: 6px;
+  }
+
+  .menu-item {
+    min-width: max-content;
+    height: 38px;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+
+  .logout {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .main {
+    padding: 14px;
+  }
+
+  .pos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-panel {
+    position: static;
+    max-height: none;
+  }
+
+  .admin-form {
+    grid-template-columns: 1fr 1fr;
+  }
 }
+
 @media (max-width: 700px) {
-  .barcode-scan-box { grid-template-columns: 1fr; }
-  .admin-form { grid-template-columns: 1fr; }
-  .modal-card { max-width: 100%; }
-  .pay-methods { grid-template-columns: 1fr 1fr; }
-  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .login-card {
+    padding: 26px 20px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .section-header {
+    align-items: flex-start;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search {
+    max-width: 100%;
+  }
+
+  .barcode-scan-box {
+    grid-template-columns: 1fr;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .img-upload-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pay-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-amounts {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stat-grid,
+  .method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .laporan-controls {
+    width: 100%;
+  }
+
+  .laporan-controls .input,
+  .laporan-controls .btn {
+    width: 100% !important;
+  }
+
+  .archive-actions .btn {
+    width: 100% !important;
+  }
+
+  .modal {
+    padding: 12px;
+  }
+
+  .modal-card {
+    max-width: 100%;
+  }
+
+  .modal-actions,
+  .pay-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .toast {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    min-width: auto;
+    max-width: none;
+  }
 }
+
 @media (max-width: 480px) {
-  .topbar { flex-direction: column; align-items: flex-start; }
-  .quick-amounts { grid-template-columns: repeat(3,1fr); }
-  .stat-grid { grid-template-columns: 1fr; }
+  .main {
+    padding: 10px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand h1,
+  .topbar h1 {
+    font-size: 18px;
+  }
+
+  .clock {
+    font-size: 15px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .btn {
+    width: 100%;
+  }
 }
 
 .menu-item i,

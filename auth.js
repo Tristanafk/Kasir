@@ -55,7 +55,7 @@ window.doLogin = async function () {
       ? "Password salah." : err.message;
     showToast(msg, "error");
   } finally {
-    if (btn) { btn.textContent = "Masuk →"; btn.disabled = false; }
+    if (btn) { btn.innerHTML = 'Masuk <i class="fa-solid fa-right-to-bracket"></i>'; btn.disabled = false; }
   }
 };
 

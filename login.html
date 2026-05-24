@@ -9,6 +9,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
   <style>
     .login-dark-toggle {
       position: fixed; top: 18px; right: 18px;
@@ -28,7 +32,9 @@
 </head>
 <body>
 
-  <button class="login-dark-toggle" id="darkModeToggle" onclick="toggleDarkMode()" title="Ganti tema">🌙</button>
+  <button class="login-dark-toggle" id="darkModeToggle" onclick="toggleDarkMode()" title="Ganti tema">
+    <i class="fa-solid fa-moon"></i>
+  </button>
 
   <section class="page login-page active">
     <div class="login-card">
@@ -67,7 +73,7 @@
       </div>
 
       <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">
-        Masuk →
+        Masuk <i class="fa-solid fa-right-to-bracket"></i>
       </button>
 
       <p class="hint">Login menggunakan akun kasir yang terdaftar.</p>
@@ -91,12 +97,18 @@
       const next = current === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('ks-theme', next);
-      document.getElementById('darkModeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('darkModeToggle').innerHTML =
+        next === 'dark'
+          ? '<i class="fa-solid fa-sun"></i>'
+          : '<i class="fa-solid fa-moon"></i>';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       const theme = localStorage.getItem('ks-theme') || 'light';
-      document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+      document.getElementById('darkModeToggle').innerHTML =
+        theme === 'dark'
+          ? '<i class="fa-solid fa-sun"></i>'
+          : '<i class="fa-solid fa-moon"></i>';
     });
   </script>
 
