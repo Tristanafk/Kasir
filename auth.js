@@ -91,7 +91,9 @@ onAuthStateChanged(auth, async user => {
       const toggle = document.getElementById("darkModeToggle");
       if (toggle) {
         const theme = localStorage.getItem("ks-theme") || "light";
-        toggle.textContent = theme === "dark" ? "☀️" : "🌙";
+        toggle.innerHTML = theme === "dark"
+          ? '<i class="fa-solid fa-sun"></i>'
+          : '<i class="fa-solid fa-moon"></i>';
       }
 
     } catch (err) {

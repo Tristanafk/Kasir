@@ -70,6 +70,24 @@ window.setCurrentUserData = function (user, role, displayName) {
   renderAdminProductTable(PRODUCTS);
 };
 
+window.toggleMobileMenu = function () {
+  document.querySelector(".sidebar")?.classList.toggle("show-mobile");
+};
+
+document.addEventListener("click", function (e) {
+  const sidebar = document.querySelector(".sidebar");
+  const menuBtn = document.querySelector(".mobile-menu-btn");
+
+  if (!sidebar || !menuBtn) return;
+
+  const klikDiSidebar = sidebar.contains(e.target);
+  const klikDiButton = menuBtn.contains(e.target);
+
+  if (!klikDiSidebar && !klikDiButton) {
+    sidebar.classList.remove("show-mobile");
+  }
+});
+
 /* =========================
    THEME / DARK MODE
 ========================= */
@@ -1164,6 +1182,7 @@ window.switchTab = function (tabName, btn) {
   if (tabName === "laporan") {
     loadLaporan();
   }
+  document.querySelector(".sidebar")?.classList.remove("show-mobile");
 };
 
 /* =========================
