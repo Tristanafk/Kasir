@@ -1048,16 +1048,25 @@ function renderLaporanTable(transactions) {
 }
 
 window.downloadLaporanPDF = async function () {
-  const dateInput = document.getElementById("laporanDate");
-  const selectedDate = dateInput?.value;
+  const type = document.getElementById("laporanType")?.value || "harian";
 
-  if (!selectedDate) {
+  const selectedDate = document.getElementById("laporanDate")?.value;
+  const selectedMonth = document.getElementById("laporanMonth")?.value;
+
+  if (type === "harian" && !selectedDate) {
     showToast("Pilih tanggal laporan dulu.", "error");
     return;
   }
 
+  if (type === "bulanan" && !selectedMonth) {
+    showToast("Pilih bulan laporan dulu.", "error");
+    return;
+  }
+
   try {
-    const { start, end } = getDateRange(selectedDate);
+    const { start, end } = type === "harian"
+      ? getDateRange(selectedDate)
+      : getMonthRange(selectedMonth);
 
     const q = query(
       collection(db, "transactions"),
@@ -1067,10 +1076,13 @@ window.downloadLaporanPDF = async function () {
     );
 
     const snapshot = await getDocs(q);
-    const transactions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const transactions = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }));
 
     if (!transactions.length) {
-      showToast("Tidak ada transaksi pada tanggal ini.", "info");
+      showToast("Tidak ada transaksi.", "info");
       return;
     }
 
@@ -1082,10 +1094,25 @@ window.downloadLaporanPDF = async function () {
     const totalPpn = transactions.reduce((sum, t) => sum + Number(t.ppn || 0), 0);
 
     docPdf.setFontSize(16);
-    docPdf.text("Laporan Penjualan Harian", 14, 15);
+
+    docPdf.text(
+      type === "harian"
+        ? "Laporan Penjualan Harian"
+        : "Laporan Penjualan Bulanan",
+      14,
+      15
+    );
 
     docPdf.setFontSize(10);
-    docPdf.text(`Tanggal: ${formatDisplayDate(selectedDate)}`, 14, 23);
+
+    docPdf.text(
+      type === "harian"
+        ? `Tanggal: ${formatDisplayDate(selectedDate)}`
+        : `Bulan: ${formatDisplayMonth(selectedMonth)}`,
+      14,
+      23
+    );
+
     docPdf.text(`Dicetak oleh: ${currentDisplayName || "-"}`, 14, 29);
 
     docPdf.text(`Total Omzet: ${formatRp(totalOmzet)}`, 14, 39);
@@ -1112,13 +1139,31 @@ window.downloadLaporanPDF = async function () {
 
     docPdf.autoTable({
       startY: 65,
-      head: [["ID", "Tanggal", "Metode", "Subtotal", "Diskon", "PPN", "Total", "Kasir"]],
+      head: [[
+        "ID",
+        "Tanggal",
+        "Metode",
+        "Subtotal",
+        "Diskon",
+        "PPN",
+        "Total",
+        "Kasir"
+      ]],
       body: rows,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [37, 99, 235] }
+      styles: {
+        fontSize: 8
+      },
+      headStyles: {
+        fillColor: [37, 99, 235]
+      }
     });
 
-    docPdf.save(`laporan-penjualan-${selectedDate}.pdf`);
+    const fileName = type === "harian"
+      ? `laporan-harian-${selectedDate}.pdf`
+      : `laporan-bulanan-${selectedMonth}.pdf`;
+
+    docPdf.save(fileName);
+
     showToast("PDF laporan berhasil dibuat.", "success");
 
   } catch (err) {
