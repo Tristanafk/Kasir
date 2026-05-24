@@ -875,3 +875,23 @@ label i {
   background: #dc2626 !important;
   color: white !important;
 }
+html[data-theme="dark"] #cartList .cart-item,
+html[data-theme="dark"] .cart-list .cart-item {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
+
+html[data-theme="dark"] #cartList .cart-title,
+html[data-theme="dark"] .cart-list .cart-title {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] #cartList .cart-price,
+html[data-theme="dark"] .cart-list .cart-price {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme="dark"] #cartList .cart-bottom b,
+html[data-theme="dark"] .cart-list .cart-bottom b {
+  color: #ffffff !important;
+}
