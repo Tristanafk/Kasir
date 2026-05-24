@@ -851,3 +851,48 @@ label i {
     justify-content: space-between;
   }
 }
+
+/* =========================
+   DARK MODE CART IMPROVEMENT
+========================= */
+
+[data-theme="dark"] .cart-item {
+  background: #161b22;
+  border: 1px solid #2d3748;
+}
+
+[data-theme="dark"] .cart-title {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .cart-price {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .cart-bottom b {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .qty button {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+[data-theme="dark"] .qty button:hover {
+  background: #3b82f6;
+}
+
+[data-theme="dark"] .remove {
+  background: #dc2626;
+  color: white;
+  border: none;
+}
+
+[data-theme="dark"] .remove:hover {
+  background: #ef4444;
+}
+
+[data-theme="dark"] .cart-item i {
+  color: #f8fafc;
+}
