@@ -80,7 +80,7 @@ function applySavedTheme() {
   const toggle = document.getElementById("darkModeToggle");
   if (toggle) {
     toggle.innerHTML = theme === "dark"
-      ? '<i class="fa-solid fa-sun"></i>'
+      ? ""
       : '<i class="fa-solid fa-moon"></i>';
   }
 }
@@ -93,9 +93,10 @@ window.toggleDarkMode = function () {
   localStorage.setItem("ks-theme", next);
 
   const toggle = document.getElementById("darkModeToggle");
+
   if (toggle) {
     toggle.innerHTML = next === "dark"
-      ? '<i class="fa-solid fa-sun"></i>'
+      ? ""
       : '<i class="fa-solid fa-moon"></i>';
   }
 };
