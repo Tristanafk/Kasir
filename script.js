@@ -70,20 +70,6 @@ window.setCurrentUserData = function (user, role, displayName) {
   renderAdminProductTable(PRODUCTS);
 };
 
-document.addEventListener("click", function (e) {
-  const sidebar = document.querySelector(".sidebar");
-  const menuBtn = document.querySelector(".mobile-menu-btn");
-
-  if (!sidebar || !menuBtn) return;
-
-  const klikDiSidebar = sidebar.contains(e.target);
-  const klikDiButton = menuBtn.contains(e.target);
-
-  if (!klikDiSidebar && !klikDiButton) {
-    sidebar.classList.remove("show-mobile");
-  }
-});
-
 /* =========================
    THEME / DARK MODE
 ========================= */

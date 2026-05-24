@@ -905,3 +905,31 @@ html[data-theme="dark"] .product-card:hover {
   background: #162033;
   border-color: #3b82f6;
 }
+
+.topbar-logout {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid transparent;
+
+  display: none;
+  place-items: center;
+
+  flex-shrink: 0;
+}
+
+.topbar-logout:hover {
+  filter: brightness(0.95);
+}
+
+@media (max-width: 700px) {
+  .topbar-logout {
+    display: grid;
+  }
+
+  .logout {
+    display: none !important;
+  }
+}
