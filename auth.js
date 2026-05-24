@@ -91,15 +91,6 @@ onAuthStateChanged(auth, async user => {
         el.style.display = "block";
       });
 
-      // Apply dark mode icon
-      const toggle = document.getElementById("darkModeToggle");
-      if (toggle) {
-        const theme = localStorage.getItem("ks-theme") || "light";
-        toggle.innerHTML = theme === "dark"
-          ? '<i class="fa-solid fa-sun"></i>'
-          : '<i class="fa-solid fa-moon"></i>';
-      }
-
     } catch (err) {
       console.error(err);
     }

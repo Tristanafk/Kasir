@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=11" />
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -32,15 +32,15 @@
 </head>
 <body>
 
-  <button class="login-dark-toggle" id="darkModeToggle" onclick="toggleDarkMode()" title="Ganti tema">
-    <i class="fa-solid fa-moon"></i>
-  </button>
+  <button class="login-dark-toggle" id="darkModeToggle" onclick="toggleDarkMode()" title="Ganti tema"></button>
 
   <section class="page login-page active">
     <div class="login-card">
 
       <div class="brand">
-        <div class="brand-logo">KS</div>
+        <div class="brand-logo login-logo">
+          <img id="loginLogo" src="images/tc-logo-light.png" alt="TannCave Logo">
+        </div>
         <div>
           <h1>Kantin Sekolah</h1>
           <p>Sistem Kasir Digital</p>
@@ -85,33 +85,40 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    // Apply dark mode before scripts load to avoid flash
+    function updateLoginThemeUI(theme) {
+      const toggle = document.getElementById("darkModeToggle");
+      const logo = document.getElementById("loginLogo");
+
+      if (toggle) {
+        toggle.innerHTML = theme === "dark"
+          ? '<i class="fa-solid fa-sun"></i>'
+          : '<i class="fa-solid fa-moon"></i>';
+      }
+
+      if (logo) {
+        logo.src = theme === "dark"
+          ? "images/tc-logo-dark.png"
+          : "images/tc-logo-light.png";
+      }
+    }
+
     (function() {
-      const theme = localStorage.getItem('ks-theme') || 'light';
-      document.documentElement.setAttribute('data-theme', theme);
-      // will update icon after DOM loads
+      const theme = localStorage.getItem("ks-theme") || "light";
+      document.documentElement.setAttribute("data-theme", theme);
+      window.addEventListener("DOMContentLoaded", () => updateLoginThemeUI(theme));
     })();
 
     function toggleDarkMode() {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('ks-theme', next);
-      document.getElementById('darkModeToggle').innerHTML =
-        next === 'dark'
-          ? '<i class="fa-solid fa-sun"></i>'
-          : '<i class="fa-solid fa-moon"></i>';
-    }
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const theme = localStorage.getItem('ks-theme') || 'light';
-      document.getElementById('darkModeToggle').innerHTML =
-        theme === 'dark'
-          ? '<i class="fa-solid fa-sun"></i>'
-          : '<i class="fa-solid fa-moon"></i>';
-    });
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("ks-theme", next);
+
+      updateLoginThemeUI(next);
+    }
   </script>
 
-  <script type="module" src="auth.js"></script>
+  <script type="module" src="auth.js?v=11"></script>
 </body>
 </html>

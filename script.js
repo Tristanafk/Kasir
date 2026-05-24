@@ -80,8 +80,17 @@ function applySavedTheme() {
   const toggle = document.getElementById("darkModeToggle");
   if (toggle) {
     toggle.innerHTML = theme === "dark"
-      ? ""
+      ? '<i class="fa-solid fa-sun"></i>'
       : '<i class="fa-solid fa-moon"></i>';
+  }
+
+  const brandLogo = document.querySelector(".brand-logo.small img");
+
+  if (brandLogo) {
+    brandLogo.src =
+      theme === "dark"
+        ? "images/tc-logo-dark.png"
+        : "images/tc-logo-light.png";
   }
 }
 
@@ -96,8 +105,17 @@ window.toggleDarkMode = function () {
 
   if (toggle) {
     toggle.innerHTML = next === "dark"
-      ? ""
+      ? '<i class="fa-solid fa-sun"></i>'
       : '<i class="fa-solid fa-moon"></i>';
+  }
+
+  const brandLogo = document.querySelector(".brand-logo.small img");
+
+  if (brandLogo) {
+    brandLogo.src =
+      next === "dark"
+        ? "images/tc-logo-dark.png"
+        : "images/tc-logo-light.png";
   }
 };
 
@@ -590,8 +608,18 @@ function showReceipt(transaction) {
   receiptArea.innerHTML = `
     <div class="receipt">
       <div class="receipt-header">
-        <h2>Kantin Sekolah</h2>
-        <p>Sistem Kasir Digital</p>
+        <div class="receipt-brand">
+        <img 
+          src="${
+            document.documentElement.getAttribute('data-theme') === 'dark'
+              ? 'images/tc-logo-dark.png'
+              : 'images/tc-logo-light.png'
+          }"
+          alt="TannCave Logo"
+        >
+          <h2>TannCave</h2>
+          <p>Point of Sale</p>
+        </div>
       </div>
 
       <hr>
@@ -620,22 +648,27 @@ function showReceipt(transaction) {
         <span>Subtotal</span>
         <b>${formatRp(transaction.subtotal)}</b>
       </div>
+
       <div class="receipt-row">
         <span>Diskon</span>
         <b>- ${formatRp(transaction.discount)}</b>
       </div>
+
       <div class="receipt-row">
         <span>PPN 11%</span>
         <b>+ ${formatRp(transaction.ppn)}</b>
       </div>
+
       <div class="receipt-row total">
         <span>Total</span>
         <b>${formatRp(transaction.total)}</b>
       </div>
+
       <div class="receipt-row">
         <span>Bayar</span>
         <b>${formatRp(transaction.paid)}</b>
       </div>
+
       <div class="receipt-row change">
         <span>Kembalian</span>
         <b>${formatRp(transaction.change)}</b>
@@ -643,14 +676,30 @@ function showReceipt(transaction) {
 
       <hr>
 
+      <div class="receipt-barcode">
+        <svg id="receiptBarcode"></svg>
+        <p>${escapeHtml(transaction.id.slice(0, 12))}</p>
+      </div>
+
       <div class="receipt-footer">
         <p class="thanks">Terima kasih sudah berbelanja.</p>
-        <p>Simpan struk ini sebagai bukti transaksi.</p>
+        <p>TannCave — Simpan struk ini sebagai bukti transaksi.</p>
       </div>
     </div>
   `;
 
   modal.classList.add("show");
+  setTimeout(() => {
+    if (window.JsBarcode) {
+      JsBarcode("#receiptBarcode", transaction.id.slice(0, 12), {
+        format: "CODE128",
+        width: 1.5,
+        height: 45,
+        displayValue: false,
+        margin: 4
+      });
+    }
+  }, 100);
 }
 
 window.closeReceipt = function () {
@@ -681,20 +730,45 @@ window.printReceipt = function () {
           .receipt-row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; margin: 6px 0; }
           .total { font-size: 16px; font-weight: bold; }
           .thanks { margin-top: 12px; font-weight: bold; }
+
+          .receipt-brand {
+            text-align: center;
+            margin-bottom: 12px;
+          }
+
+          .receipt-brand img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            margin: 0 auto 10px;
+          }
+
+          .receipt-brand h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+          }
+
+          .receipt-brand p {
+            margin-top: 3px;
+            font-size: 11px;
+            color: #555;
+          }
         </style>
       </head>
       <body>
         ${receiptContent}
         <script>
-          window.onload = function() {
-            window.print();
-          };
         <\/script>
       </body>
     </html>
   `);
-
   printWindow.document.close();
+
+  printWindow.onload = () => {
+    printWindow.focus();
+    printWindow.print();
+  };
 };
 
 /* =========================
@@ -1032,7 +1106,6 @@ function renderLaporanTable(transactions) {
 
 window.downloadLaporanPDF = async function () {
   const type = document.getElementById("laporanType")?.value || "harian";
-
   const selectedDate = document.getElementById("laporanDate")?.value;
   const selectedMonth = document.getElementById("laporanMonth")?.value;
 
@@ -1059,10 +1132,7 @@ window.downloadLaporanPDF = async function () {
     );
 
     const snapshot = await getDocs(q);
-    const transactions = snapshot.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }));
+    const transactions = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
     if (!transactions.length) {
       showToast("Tidak ada transaksi.", "info");
@@ -1070,39 +1140,85 @@ window.downloadLaporanPDF = async function () {
     }
 
     const { jsPDF } = window.jspdf;
-    const docPdf = new jsPDF();
+    const docPdf = new jsPDF("p", "mm", "a4");
 
     const totalOmzet = transactions.reduce((sum, t) => sum + Number(t.total || 0), 0);
     const totalDiscount = transactions.reduce((sum, t) => sum + Number(t.discount || 0), 0);
     const totalPpn = transactions.reduce((sum, t) => sum + Number(t.ppn || 0), 0);
+    const totalTransaksi = transactions.length;
+    const rataRata = totalTransaksi ? totalOmzet / totalTransaksi : 0;
 
-    docPdf.setFontSize(16);
+    const periode = type === "harian"
+      ? formatDisplayDate(selectedDate)
+      : formatDisplayMonth(selectedMonth);
 
+    // ===== HEADER =====
+    docPdf.setFillColor(15, 23, 42);
+    docPdf.rect(0, 0, 210, 34, "F");
+
+    try {
+      const logoBase64 = await imageToBase64("images/tc-logo-dark.png");
+      docPdf.addImage(logoBase64, "PNG", 14, 7, 18, 18);
+    } catch (err) {
+      console.warn("Logo PDF gagal dimuat:", err);
+    }
+
+    docPdf.setTextColor(255, 255, 255);
+    docPdf.setFontSize(18);
+    docPdf.setFont(undefined, "bold");
+    docPdf.text("TannCave", 36, 15);
+
+    docPdf.setFontSize(10);
+    docPdf.setFont(undefined, "normal");
+    docPdf.text("Laporan Penjualan Point of Sale", 36, 22);
+
+    docPdf.setFontSize(9);
+    docPdf.text(`Periode: ${periode}`, 150, 14);
+    docPdf.text(`Dicetak: ${new Date().toLocaleString("id-ID")}`, 150, 20);
+
+    // ===== TITLE =====
+    docPdf.setTextColor(15, 23, 42);
+    docPdf.setFontSize(15);
+    docPdf.setFont(undefined, "bold");
     docPdf.text(
-      type === "harian"
-        ? "Laporan Penjualan Harian"
-        : "Laporan Penjualan Bulanan",
+      type === "harian" ? "Laporan Penjualan Harian" : "Laporan Penjualan Bulanan",
       14,
-      15
+      48
     );
 
     docPdf.setFontSize(10);
+    docPdf.setFont(undefined, "normal");
+    docPdf.setTextColor(100, 116, 139);
+    docPdf.text(`Kasir / Pencetak: ${currentDisplayName || "-"}`, 14, 55);
 
-    docPdf.text(
-      type === "harian"
-        ? `Tanggal: ${formatDisplayDate(selectedDate)}`
-        : `Bulan: ${formatDisplayMonth(selectedMonth)}`,
-      14,
-      23
-    );
+    // ===== SUMMARY CARDS =====
+    const cards = [
+      ["Total Omzet", formatRp(totalOmzet)],
+      ["Jumlah Transaksi", `${totalTransaksi} transaksi`],
+      ["Rata-rata", formatRp(rataRata)],
+      ["Total Diskon", formatRp(totalDiscount)]
+    ];
 
-    docPdf.text(`Dicetak oleh: ${currentDisplayName || "-"}`, 14, 29);
+    let x = 14;
+    cards.forEach(([label, value]) => {
+      docPdf.setFillColor(248, 250, 252);
+      docPdf.setDrawColor(226, 232, 240);
+      docPdf.roundedRect(x, 64, 43, 22, 3, 3, "FD");
 
-    docPdf.text(`Total Omzet: ${formatRp(totalOmzet)}`, 14, 39);
-    docPdf.text(`Jumlah Transaksi: ${transactions.length}`, 14, 45);
-    docPdf.text(`Total Diskon: ${formatRp(totalDiscount)}`, 14, 51);
-    docPdf.text(`Total PPN: ${formatRp(totalPpn)}`, 14, 57);
+      docPdf.setFontSize(8);
+      docPdf.setTextColor(100, 116, 139);
+      docPdf.text(label, x + 3, 71);
 
+      docPdf.setFontSize(10);
+      docPdf.setFont(undefined, "bold");
+      docPdf.setTextColor(15, 23, 42);
+      docPdf.text(value, x + 3, 80);
+
+      docPdf.setFont(undefined, "normal");
+      x += 47;
+    });
+
+    // ===== TABLE =====
     const rows = transactions.map(t => {
       const date = t.createdAt?.toDate
         ? t.createdAt.toDate().toLocaleString("id-ID")
@@ -1121,7 +1237,7 @@ window.downloadLaporanPDF = async function () {
     });
 
     docPdf.autoTable({
-      startY: 65,
+      startY: 96,
       head: [[
         "ID",
         "Tanggal",
@@ -1134,19 +1250,61 @@ window.downloadLaporanPDF = async function () {
       ]],
       body: rows,
       styles: {
-        fontSize: 8
+        fontSize: 7.5,
+        cellPadding: 2.5,
+        textColor: [15, 23, 42],
+        lineColor: [226, 232, 240],
+        lineWidth: 0.1
       },
       headStyles: {
-        fillColor: [37, 99, 235]
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: "bold"
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252]
+      },
+      columnStyles: {
+        6: { fontStyle: "bold" }
+      },
+      didDrawPage: function () {
+        const pageHeight = docPdf.internal.pageSize.height;
+
+        docPdf.setFontSize(8);
+        docPdf.setTextColor(148, 163, 184);
+        docPdf.text("TannCave POS — Laporan ini dibuat otomatis oleh sistem.", 14, pageHeight - 10);
+
+        docPdf.text(
+          `Halaman ${docPdf.internal.getNumberOfPages()}`,
+          180,
+          pageHeight - 10
+        );
       }
     });
 
+    // ===== FOOTER SUMMARY =====
+    const finalY = docPdf.lastAutoTable.finalY + 10;
+
+    if (finalY < 270) {
+      docPdf.setDrawColor(226, 232, 240);
+      docPdf.line(14, finalY, 196, finalY);
+
+      docPdf.setFontSize(10);
+      docPdf.setTextColor(15, 23, 42);
+      docPdf.setFont(undefined, "bold");
+      docPdf.text("Ringkasan Akhir", 14, finalY + 8);
+
+      docPdf.setFont(undefined, "normal");
+      docPdf.setFontSize(9);
+      docPdf.text(`Total PPN: ${formatRp(totalPpn)}`, 14, finalY + 15);
+      docPdf.text(`Total Omzet Bersih: ${formatRp(totalOmzet)}`, 14, finalY + 21);
+    }
+
     const fileName = type === "harian"
-      ? `laporan-harian-${selectedDate}.pdf`
-      : `laporan-bulanan-${selectedMonth}.pdf`;
+      ? `laporan-harian-tanncave-${selectedDate}.pdf`
+      : `laporan-bulanan-tanncave-${selectedMonth}.pdf`;
 
     docPdf.save(fileName);
-
     showToast("PDF laporan berhasil dibuat.", "success");
 
   } catch (err) {
@@ -1154,6 +1312,27 @@ window.downloadLaporanPDF = async function () {
     showToast("Gagal membuat PDF laporan.", "error");
   }
 };
+
+function imageToBase64(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      resolve(canvas.toDataURL("image/png"));
+    };
+
+    img.onerror = reject;
+    img.src = url;
+  });
+}
 
 window.toggleLaporanInput = function () {
   const type = document.getElementById("laporanType")?.value || "harian";
