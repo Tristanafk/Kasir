@@ -70,10 +70,6 @@ window.setCurrentUserData = function (user, role, displayName) {
   renderAdminProductTable(PRODUCTS);
 };
 
-window.toggleMobileMenu = function () {
-  document.querySelector(".sidebar")?.classList.toggle("show-mobile");
-};
-
 document.addEventListener("click", function (e) {
   const sidebar = document.querySelector(".sidebar");
   const menuBtn = document.querySelector(".mobile-menu-btn");
