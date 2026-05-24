@@ -788,12 +788,12 @@ label i {
     height: 62px;
     min-width: 0;
     padding: 6px 4px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     text-align: center;
 
     display: flex;
-    flex-direction: column;
+    flex-direction: column !important;
     align-items: center;
     justify-content: center;
 
@@ -804,13 +804,23 @@ label i {
   }
 
   .menu-item i {
-    font-size: 18px;
-    margin: 0;
+    display: block;
+    font-size: 19px;
+    margin: 0 !important;
   }
 
   .menu-item.active {
     background: var(--primary-light);
     color: var(--primary);
+  }
+
+  .menu-item:hover {
+    background: var(--soft);
+    color: var(--text);
+  }
+
+  .menu-item.active i {
+    transform: translateY(-1px);
   }
 
   .main {
