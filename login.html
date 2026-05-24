@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Kasir Kantin Sekolah</title>
+  <meta name="description" content="Login ke sistem kasir kantin sekolah">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .login-dark-toggle {
+      position: fixed; top: 18px; right: 18px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 18px; display: grid; place-items: center;
+      cursor: pointer; box-shadow: var(--shadow);
+      transition: var(--transition);
+      z-index: 10;
+    }
+    .login-dark-toggle:hover { background: var(--primary-light); border-color: var(--primary); }
+    .login-version { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; }
+    .login-divider { display: flex; align-items: center; gap: 10px; margin: 20px 0 18px; }
+    .login-divider span { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  </style>
+</head>
+<body>
+
+  <button class="login-dark-toggle" id="darkModeToggle" onclick="toggleDarkMode()" title="Ganti tema">🌙</button>
+
+  <section class="page login-page active">
+    <div class="login-card">
+
+      <div class="brand">
+        <div class="brand-logo">KS</div>
+        <div>
+          <h1>Kantin Sekolah</h1>
+          <p>Sistem Kasir Digital</p>
+        </div>
+      </div>
+
+      <div class="login-divider"><span>Masuk ke akun Anda</span></div>
+
+      <div class="form-group">
+        <label for="loginUsername">Username</label>
+        <input
+          id="loginUsername"
+          class="input"
+          type="text"
+          placeholder="Masukkan username"
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="loginPass">Password</label>
+        <input
+          id="loginPass"
+          class="input"
+          type="password"
+          placeholder="Masukkan password"
+          autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') doLogin()"
+        >
+      </div>
+
+      <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">
+        Masuk →
+      </button>
+
+      <p class="hint">Login menggunakan akun kasir yang terdaftar.</p>
+      <p class="login-version">v2.0 — Kasir Kantin Sekolah</p>
+
+    </div>
+  </section>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Apply dark mode before scripts load to avoid flash
+    (function() {
+      const theme = localStorage.getItem('ks-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      // will update icon after DOM loads
+    })();
+
+    function toggleDarkMode() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ks-theme', next);
+      document.getElementById('darkModeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const theme = localStorage.getItem('ks-theme') || 'light';
+      document.getElementById('darkModeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+    });
+  </script>
+
+  <script type="module" src="auth.js"></script>
+</body>
+</html>
