@@ -749,3 +749,58 @@ label i {
 .dark-toggle i {
   font-size: 16px;
 }
+
+
+@media (max-width: 700px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    min-height: auto;
+    padding: 8px;
+    z-index: 999;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-brand {
+    display: none;
+  }
+
+  .menu {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .menu-item {
+    height: 54px;
+    min-width: 0;
+    padding: 6px 4px;
+    font-size: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 10px;
+  }
+
+  .menu-item i {
+    font-size: 15px;
+  }
+
+  .logout {
+    display: none;
+  }
+
+  .main {
+    padding-bottom: 90px;
+  }
+}
